@@ -12,14 +12,25 @@ in
     /* Here goes the rest of your home-manager config, e.g. home.packages = [ pkgs.foo ]; */
 
     home.packages = with pkgs; [
-        htop
-        fortune
-	wezterm
-	zsh
-        neovim
-	git
-	bitwarden-desktop
-	stow
+      htop
+      fortune
+      wezterm
+      zsh
+      neovim
+      git
+      bitwarden-desktop
+      stow
+
+      gnomeExtensions.appindicator
     ];
+
+    dconf = {
+        enable = true;
+        settings = {
+          "org/gnome/shell" = {
+          };
+          "org/gnome/desktop/interface".show-battery-percentage = true;
+        };
+    };
   };
 }
