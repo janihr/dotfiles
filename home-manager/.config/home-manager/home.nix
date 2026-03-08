@@ -18,11 +18,12 @@ in
       zsh
       neovim
       git
-      bitwarden-desktop
       stow
+      bitwarden-desktop
       nextcloud-client
       signal-desktop
 
+      gnome-tweaks
       gnomeExtensions.appindicator
     ];
 
