@@ -20,6 +20,8 @@ in
       git
       bitwarden-desktop
       stow
+      nextcloud-client
+      signal-desktop
 
       gnomeExtensions.appindicator
     ];
