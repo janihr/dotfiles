@@ -11,6 +11,7 @@
     gnomeExtensions.appindicator
 
     stow
+    thunderbird
     bitwarden-desktop
     signal-desktop
     nextcloud-client
