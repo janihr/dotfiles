@@ -20,6 +20,7 @@
 
     # dev programs
     uv
+    mpls # markdown lsp
   ];
 
   home.stateVersion = "25.11";
