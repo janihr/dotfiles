@@ -96,6 +96,9 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # allow dynamicallyy linked executables
+  programs.nix-ld.enable = true;
+
   # Enable the Flakes feature and the accompanying new nix command-line tool
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   # List packages installed in system profile. To search, run:
