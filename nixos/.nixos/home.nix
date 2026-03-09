@@ -12,6 +12,7 @@
 
     stow
     bitwarden-desktop
+    signal-desktop
   ];
 
   home.stateVersion = "25.11";
