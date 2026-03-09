@@ -1,6 +1,3 @@
-[language-server.jedi]
-config.workspace.environmentPath = ".venv"
-
 [[language]]
 name = "python"
 auto-format = true
@@ -9,3 +6,15 @@ language-servers = [
   "ruff",
   "jedi",
 ]
+
+[language-server.jedi]
+config.workspace.environmentPath = ".venv"
+
+
+[[language]]
+name = "markdown"
+language-servers = [ "mpls" ]
+
+[language-server.mpls]
+command = "mpls"
+config = { markdown.preview.auto = true }
