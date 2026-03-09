@@ -2,11 +2,19 @@ theme = "onedark"
 
 [editor]
 line-number = "relative"
+bufferline = "multiple"
 
 [editor.cursor-shape]
 insert = "bar"
 normal = "block"
 select = "underline"
+
+[editor.whitespace.render]
+space = "none"
+tab = "none"
+nbsp = "all"
+nnbsp = "all"
+newline = "all"
 
 [editor.file-picker]
 hidden = false
