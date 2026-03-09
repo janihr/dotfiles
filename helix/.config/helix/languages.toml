@@ -1,0 +1,11 @@
+[language-server.jedi]
+config.workspace.environmentPath = ".venv"
+
+[[language]]
+name = "python"
+auto-format = true
+language-servers = [
+  {name = "ty", except-features = [ "completion", "signature-help" ]},
+  "ruff",
+  "jedi",
+]
