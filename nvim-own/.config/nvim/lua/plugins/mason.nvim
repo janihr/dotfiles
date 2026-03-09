@@ -1,0 +1,3 @@
+{
+    "williamboman/mason.nvim"
+}
