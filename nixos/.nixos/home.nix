@@ -13,6 +13,7 @@
     stow
     bitwarden-desktop
     signal-desktop
+    nextcloud-client
   ];
 
   home.stateVersion = "25.11";
