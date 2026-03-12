@@ -15,6 +15,7 @@
       environment.systemPackages = with pkgs; [
           vim
           helix
+          tmux
           fastfetch
         ];
 
