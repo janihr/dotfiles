@@ -110,7 +110,12 @@
     wget
     git
     zsh
+
+    displaylink
   ];
+
+  services.xserver.videoDrivers = [ "displaylink" ];
+  systemd.services.dlm.wantedBy = [ "multi-user.target" ];
 
   # set default editor to helix
   environment.variables.EDITOR = "hx";
