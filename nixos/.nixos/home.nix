@@ -21,6 +21,8 @@
     # dev programs
     uv
     mpls # markdown lsp
+
+    pkgs.gnomeExtensions.paperwm
   ];
 
   home.stateVersion = "25.11";
