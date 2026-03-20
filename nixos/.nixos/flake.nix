@@ -19,7 +19,7 @@
       # TODO please change the hostname to your own
       goodberry = nixpkgs.lib.nixosSystem {
         modules = [
-          ./configuration.nix
+          ./hosts/goodberry
 
           # make home-manager as a module of nixos
           # so that home-manager configuration will be deployed automatically when executing `nixos-rebuild switch`
