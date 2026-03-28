@@ -293,7 +293,7 @@ web_client {
 // Default: $SHELL
 // 
 // default_shell "fish"
-default_shell zsh
+default_shell "zsh"
  
 // Choose the path to override cwd that zellij will use for opening new panes
 // 
