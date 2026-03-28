@@ -120,6 +120,7 @@
     wget
     git
     zsh
+    zellij
 
     # displaylink
   ];
