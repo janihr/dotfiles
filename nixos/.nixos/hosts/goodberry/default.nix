@@ -42,6 +42,16 @@
     LC_TIME = "de_DE.UTF-8";
   };
 
+  services.udev.extraHwdb = ''
+    evdev:atkbd:*
+        KEYBOARD_KEY_3a=esc
+        KEYBOARD_KEY_01=capslock
+
+    evdev:input:b*v*p*:
+        KEYBOARD_KEY_3a=esc
+        KEYBOARD_KEY_01=capslock
+  '';
+
   # # Enable the X11 windowing system.
   # services.xserver.enable = true;
 
