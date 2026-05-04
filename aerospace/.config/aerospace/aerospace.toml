@@ -203,6 +203,18 @@ on-mode-changed = []
     # See: https://nikitabobko.github.io/AeroSpace/commands#mode
     alt-shift-semicolon = 'mode service'
 
+[workspace-to-monitor-force-assignment]
+'V' = '1'
+'T' = '1'
+'C' = '1'
+1 = '2'
+2 = '2'
+3 = '2'
+4 = '2'
+5 = '2'
+'O' = '2'
+'S' = '2'
+'B' = '3'
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.service.binding]

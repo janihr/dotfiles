@@ -31,6 +31,10 @@
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "aarch64-darwin";
 
+      # allow unfree
+      nixpkgs.config.allowUnfree = true;
+
+
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
       environment.systemPackages = with pkgs; [
@@ -38,12 +42,29 @@
         tmux
         git
         fastfetch
+        wezterm
+        teams
       ];
 
+      system.primaryUser = "jan41442";
       users.users.jan41442 = {
           name = "jan41442";
           home = "/Users/jan41442";
       };
+    # Use homebrew to install casks and Mac App Store apps
+      homebrew = {
+        enable = true;
+
+        brews = [
+          "zellij"
+        ];
+        casks = [
+          "aerospace"
+          "logseq"
+        ];
+      };
+
+     
     };
   in
   {
