@@ -49,6 +49,9 @@
       "aerospace"
       "microsoft-teams"
       "logseq"
+      "bitwarden"
+      "itk-snap"
+      "notunes"
     ];
   };
 
