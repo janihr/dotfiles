@@ -22,6 +22,7 @@
     signal-desktop
     nextcloud-client
     niri
+    libreoffice
 
     # dev programs
     uv
