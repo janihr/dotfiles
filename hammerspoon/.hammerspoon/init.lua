@@ -144,35 +144,35 @@ hs.hotkey.bind(hyperShift, "j", function()
 end)
 
 -- ============================================================
--- TILING: Quarter windows (Alt+Ctrl+Arrow)
+-- TILING: Quarter windows (Alt+Ctrl+U/I/J/K)
 -- ============================================================
 
--- Top-left quarter
-hs.hotkey.bind(hyperCtrl, "left", function()
+-- Top-left quarter (Alt+Ctrl+U)
+hs.hotkey.bind(hyperCtrl, "u", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     local s = win:screen():frame()
     win:setFrame({x = s.x, y = s.y, w = s.w / 2, h = s.h / 2})
 end)
 
--- Top-right quarter
-hs.hotkey.bind(hyperCtrl, "right", function()
+-- Top-right quarter (Alt+Ctrl+I)
+hs.hotkey.bind(hyperCtrl, "i", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     local s = win:screen():frame()
     win:setFrame({x = s.x + s.w / 2, y = s.y, w = s.w / 2, h = s.h / 2})
 end)
 
--- Bottom-left quarter
-hs.hotkey.bind(hyperCtrl, "up", function()
+-- Bottom-left quarter (Alt+Ctrl+J)
+hs.hotkey.bind(hyperCtrl, "j", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     local s = win:screen():frame()
     win:setFrame({x = s.x, y = s.y + s.h / 2, w = s.w / 2, h = s.h / 2})
 end)
 
--- Bottom-right quarter
-hs.hotkey.bind(hyperCtrl, "down", function()
+-- Bottom-right quarter (Alt+Ctrl+K)
+hs.hotkey.bind(hyperCtrl, "k", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     local s = win:screen():frame()
