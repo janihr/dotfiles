@@ -207,31 +207,46 @@ end)
 -- WORKSPACES: Switch & move windows (Alt+1..9 / Alt+Shift+1..9)
 -- ============================================================
 
-local function getSpaces()
-    local screen = hs.screen.mainScreen()
-    return hs.spaces.spacesForScreen(screen:getUUID())
-end
-
--- Switch to workspace
+-- Switch to workspace using macOS native shortcuts (Alt + 1..9)
 for i = 1, 9 do
     hs.hotkey.bind(hyper, tostring(i), function()
-        local spaces = getSpaces()
-        if spaces[i] then
-            hs.spaces.gotoSpace(spaces[i])
-        end
+        -- Fires Ctrl + [Number] to invoke native space switching
+        hs.eventtap.keyStroke({"ctrl"}, tostring(i), 0)
     end)
 end
 
--- Move window to workspace and follow
+-- Move window to workspace and follow it (Alt + Shift + 1..9)
+-- Workaround for the broken API: Simulate mouse drag during transition
 for i = 1, 9 do
     hs.hotkey.bind(hyperShift, tostring(i), function()
         local win = hs.window.focusedWindow()
         if not win then return end
-        local spaces = getSpaces()
-        if spaces[i] then
-            hs.spaces.moveWindowToSpace(win:id(), spaces[i])
-            hs.spaces.gotoSpace(spaces[i])
-        end
+        
+        -- Get the coordinates for the top-center of the window (the title bar)
+        local f = win:frame()
+        local clickPoint = {x = f.x + (f.w / 2), y = f.y + 10}
+        
+        -- 1. Press and hold down the mouse on the window title bar
+        local mouseDown = hs.eventtap.event.newMouseEvent(
+            hs.eventtap.event.types.leftMouseDown, clickPoint
+        )
+        mouseDown:post()
+        
+        -- 2. Wait a tiny fraction of a second, then trigger the space switch
+        hs.timer.doAfter(0.02, function()
+            hs.eventtap.keyStroke({"ctrl"}, tostring(i), 0)
+            
+            -- 3. Hold the window during transition, release it after destination loads
+            hs.timer.doAfter(0.35, function()
+                local mouseUp = hs.eventtap.event.newMouseEvent(
+                    hs.eventtap.event.types.leftMouseUp, clickPoint
+                )
+                mouseUp:post()
+                
+                -- 4. Re-verify window focus
+                if win then win:focus() end
+            end)
+        end)
     end)
 end
 
