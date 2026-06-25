@@ -85,7 +85,7 @@ end
 -- ============================================================
 
 -- Tile left / overflow to previous monitor (Alt+Shift+H)
-hs.hotkey.bind(hyperShift, "left", function()
+hs.hotkey.bind(hyperShift, "h", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     if isTiledLeft(win) then
@@ -100,7 +100,7 @@ hs.hotkey.bind(hyperShift, "left", function()
 end)
 
 -- Tile right / overflow to next monitor (Alt+Shift+L)
-hs.hotkey.bind(hyperShift, "right", function()
+hs.hotkey.bind(hyperShift, "l", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     if isTiledRight(win) then
@@ -115,7 +115,7 @@ hs.hotkey.bind(hyperShift, "right", function()
 end)
 
 -- Maximize / overflow to monitor above (Alt+Shift+K)
-hs.hotkey.bind(hyperShift, "up", function()
+hs.hotkey.bind(hyperShift, "k", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     if isMaximized(win) then
@@ -130,7 +130,7 @@ hs.hotkey.bind(hyperShift, "up", function()
 end)
 
 -- Restore / center window (Alt+Shift+J)
-hs.hotkey.bind(hyperShift, "down", function()
+hs.hotkey.bind(hyperShift, "j", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     local screen = win:screen():frame()
@@ -183,22 +183,22 @@ end)
 -- FOCUS: Focus window by direction (Alt+H/J/K/L)
 -- ============================================================
 
-hs.hotkey.bind(hyper, "left", function()
+hs.hotkey.bind(hyper, "h", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowWest(nil, false, false) end
 end)
 
-hs.hotkey.bind(hyper, "right", function()
+hs.hotkey.bind(hyper, "l", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowEast(nil, false, false) end
 end)
 
-hs.hotkey.bind(hyper, "up", function()
+hs.hotkey.bind(hyper, "k", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowNorth(nil, false, false) end
 end)
 
-hs.hotkey.bind(hyper, "down", function()
+hs.hotkey.bind(hyper, "j", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowSouth(nil, false, false) end
 end)
@@ -207,44 +207,48 @@ end)
 -- WORKSPACES: Switch & move windows (Alt+1..9 / Alt+Shift+1..9)
 -- ============================================================
 
--- Switch to workspace using macOS native shortcuts (Alt + 1..9)
-for i = 1, 9 do
-    hs.hotkey.bind(hyper, tostring(i), function()
-        -- Fires Ctrl + [Number] to invoke native space switching
-        hs.eventtap.keyStroke({"ctrl"}, tostring(i), 0)
-    end)
-end
-
--- Move window to workspace and follow it (Alt + Shift + 1..9)
--- Workaround for the broken API: Simulate mouse drag during transition
+-- Move window to workspace (Alt+Shift + 1..9)
+-- "Click title bar + drag during space switch" trick
 for i = 1, 9 do
     hs.hotkey.bind(hyperShift, tostring(i), function()
         local win = hs.window.focusedWindow()
         if not win then return end
-        
-        -- Get the coordinates for the top-center of the window (the title bar)
+
         local f = win:frame()
-        local clickPoint = {x = f.x + (f.w / 2), y = f.y + 10}
-        
-        -- 1. Press and hold down the mouse on the window title bar
-        local mouseDown = hs.eventtap.event.newMouseEvent(
-            hs.eventtap.event.types.leftMouseDown, clickPoint
-        )
-        mouseDown:post()
-        
-        -- 2. Wait a tiny fraction of a second, then trigger the space switch
-        hs.timer.doAfter(0.02, function()
-            hs.eventtap.keyStroke({"ctrl"}, tostring(i), 0)
-            
-            -- 3. Hold the window during transition, release it after destination loads
-            hs.timer.doAfter(0.35, function()
-                local mouseUp = hs.eventtap.event.newMouseEvent(
-                    hs.eventtap.event.types.leftMouseUp, clickPoint
-                )
-                mouseUp:post()
-                
-                -- 4. Re-verify window focus
-                if win then win:focus() end
+        -- Click just right of traffic lights (≈80px from left, 12px down)
+        -- This area is ALWAYS native draggable title bar, even in
+        -- VS Code, Chrome, etc. with custom title bar elements.
+        local clickPoint = hs.geometry.point(f.x + 80, f.y + 12)
+
+        -- 1. Move cursor to title bar
+        hs.eventtap.event.newMouseEvent(
+            hs.eventtap.event.types.mouseMoved, clickPoint):post()
+
+        hs.timer.doAfter(0.05, function()
+            -- 2. Mouse down
+            hs.eventtap.event.newMouseEvent(
+                hs.eventtap.event.types.leftMouseDown, clickPoint):post()
+
+            hs.timer.doAfter(0.05, function()
+                -- 3. Small drag to "grab" the window (required!)
+                local dragPoint = hs.geometry.point(clickPoint.x + 5, clickPoint.y)
+                hs.eventtap.event.newMouseEvent(
+                    hs.eventtap.event.types.leftMouseDragged, dragPoint):post()
+
+                hs.timer.doAfter(0.15, function()
+                    -- 4. Switch space while dragging
+                    hs.eventtap.keyStroke({"ctrl"}, tostring(i))
+
+                    -- 5. Wait for space animation to finish, then release
+                    hs.timer.doAfter(0.7, function()
+                        hs.eventtap.event.newMouseEvent(
+                            hs.eventtap.event.types.leftMouseUp, dragPoint):post()
+
+                        hs.timer.doAfter(0.1, function()
+                            if win then win:focus() end
+                        end)
+                    end)
+                end)
             end)
         end)
     end)
