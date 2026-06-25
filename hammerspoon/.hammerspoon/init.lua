@@ -206,6 +206,14 @@ end)
 -- ============================================================
 -- WORKSPACES: Switch & move windows (Alt+1..9 / Alt+Shift+1..9)
 -- ============================================================
+-- -- Switch to workspace (Alt + 1..9)
+for i = 1, 9 do
+    hs.hotkey.bind(hyper, tostring(i), function()
+        hs.timer.doAfter(0.1, function()
+            hs.eventtap.keyStroke({"ctrl"}, tostring(i))
+        end)
+    end)
+end
 
 -- Move window to workspace (Alt+Shift + 1..9)
 -- "Click title bar + drag during space switch" trick
