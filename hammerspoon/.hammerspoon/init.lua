@@ -216,51 +216,48 @@ for i = 1, 9 do
 end
 
 -- Move window to workspace (Alt+Shift + 1..9)
--- "Click title bar + drag during space switch" trick
 for i = 1, 9 do
     hs.hotkey.bind(hyperShift, tostring(i), function()
         local win = hs.window.focusedWindow()
         if not win then return end
 
-        local f = win:frame()
-        -- Click just right of traffic lights (≈80px from left, 12px down)
-        -- This area is ALWAYS native draggable title bar, even in
-        -- VS Code, Chrome, etc. with custom title bar elements.
-        local clickPoint = hs.geometry.point(f.x + 80, f.y + 12)
+        local originalFrame = win:frame()
+        local clickPoint = hs.geometry.point(originalFrame.x + 80, originalFrame.y + 12)
 
         -- 1. Move cursor to title bar
         hs.eventtap.event.newMouseEvent(
             hs.eventtap.event.types.mouseMoved, clickPoint):post()
 
-        hs.timer.doAfter(0.05, function()
+        hs.timer.doAfter(0.02, function()
             -- 2. Mouse down
             hs.eventtap.event.newMouseEvent(
                 hs.eventtap.event.types.leftMouseDown, clickPoint):post()
 
-            hs.timer.doAfter(0.05, function()
-                -- 3. Small drag to "grab" the window (required!)
+            hs.timer.doAfter(0.02, function()
+                -- 3. Small drag to "grab" the window
                 local dragPoint = hs.geometry.point(clickPoint.x + 5, clickPoint.y)
                 hs.eventtap.event.newMouseEvent(
                     hs.eventtap.event.types.leftMouseDragged, dragPoint):post()
 
-                hs.timer.doAfter(0.15, function()
+                hs.timer.doAfter(0.05, function()
                     -- 4. Switch space while dragging
                     hs.eventtap.keyStroke({"ctrl"}, tostring(i))
 
-                    -- 5. Wait for space animation to finish, then release
-                    hs.timer.doAfter(0.7, function()
+                    -- 5. Wait for crossfade to finish (Reduce Motion), then release
+                    hs.timer.doAfter(0.2, function()
                         hs.eventtap.event.newMouseEvent(
                             hs.eventtap.event.types.leftMouseUp, dragPoint):post()
 
-                        hs.timer.doAfter(0.1, function()
-                            if win then win:focus() end
-                        end)
+                        -- 6. Restore position
+                        win:setFrame(originalFrame)
+                        win:focus()
                     end)
                 end)
             end)
         end)
     end)
 end
+
 
 -- ============================================================
 -- EXTRAS
