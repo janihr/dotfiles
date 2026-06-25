@@ -85,7 +85,7 @@ end
 -- ============================================================
 
 -- Tile left / overflow to previous monitor (Alt+Shift+H)
-hs.hotkey.bind(hyperShift, "h", function()
+hs.hotkey.bind(hyperShift, "left", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     if isTiledLeft(win) then
@@ -100,7 +100,7 @@ hs.hotkey.bind(hyperShift, "h", function()
 end)
 
 -- Tile right / overflow to next monitor (Alt+Shift+L)
-hs.hotkey.bind(hyperShift, "l", function()
+hs.hotkey.bind(hyperShift, "right", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     if isTiledRight(win) then
@@ -115,7 +115,7 @@ hs.hotkey.bind(hyperShift, "l", function()
 end)
 
 -- Maximize / overflow to monitor above (Alt+Shift+K)
-hs.hotkey.bind(hyperShift, "k", function()
+hs.hotkey.bind(hyperShift, "up", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     if isMaximized(win) then
@@ -130,7 +130,7 @@ hs.hotkey.bind(hyperShift, "k", function()
 end)
 
 -- Restore / center window (Alt+Shift+J)
-hs.hotkey.bind(hyperShift, "j", function()
+hs.hotkey.bind(hyperShift, "down", function()
     local win = hs.window.focusedWindow()
     if not win then return end
     local screen = win:screen():frame()
@@ -183,22 +183,22 @@ end)
 -- FOCUS: Focus window by direction (Alt+H/J/K/L)
 -- ============================================================
 
-hs.hotkey.bind(hyper, "h", function()
+hs.hotkey.bind(hyper, "left", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowWest(nil, false, false) end
 end)
 
-hs.hotkey.bind(hyper, "l", function()
+hs.hotkey.bind(hyper, "right", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowEast(nil, false, false) end
 end)
 
-hs.hotkey.bind(hyper, "k", function()
+hs.hotkey.bind(hyper, "up", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowNorth(nil, false, false) end
 end)
 
-hs.hotkey.bind(hyper, "j", function()
+hs.hotkey.bind(hyper, "down", function()
     local win = hs.window.focusedWindow()
     if win then win:focusWindowSouth(nil, false, false) end
 end)
