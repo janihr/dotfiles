@@ -40,12 +40,28 @@ vim.indicator = hs.menubar.new()
 
 local function updateIndicator()
     local labels = {
-        normal = { text = " N ", bg = "#FF8800" },
-        insert = { text = " I ", bg = "#00CC00" },
-        visual = { text = " V ", bg = "#CC00FF" },
-        disabled = { text = " — ", bg = "#666666" },
+        normal      = { text = " N ", bg = "#FF8800" },
+        insert      = { text = " I ", bg = "#00CC00" },
+        visual      = { text = " V ", bg = "#CC00FF" },
+        disabled    = { text = " — ", bg = "#666666" },
+        passthrough = { text = " P ", bg = "#2196F3" },  -- Vimium active
+        browser_n   = { text = "PN ", bg = "#FF8800" },  -- Browser text field: Normal
+        browser_i   = { text = "PI ", bg = "#00CC00" },  -- Browser text field: Insert
+        browser_v   = { text = "PV ", bg = "#CC00FF" },  -- Browser text field: Visual
     }
-    local info = labels[vim.mode] or labels.insert
+
+    local key
+    if vim.mode == "disabled" then
+        key = "disabled"
+    elseif vim.inBrowser and not vim.wasInTextField then
+        key = "passthrough"
+    elseif vim.inBrowser and vim.wasInTextField then
+        key = "browser_" .. vim.mode:sub(1, 1)
+    else
+        key = vim.mode
+    end
+
+    local info = labels[key] or labels.insert
     vim.indicator:setTitle(hs.styledtext.new(info.text, {
         color = { hex = "#FFFFFF" },
         backgroundColor = { hex = info.bg },
@@ -525,13 +541,11 @@ vim.eventtap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
     end
 
     -- ── BROWSER TEXT FIELD DETECTION ──
-    -- If in a browser app, only intercept keys when a text field is focused
     if vim.inBrowser then
         local inTextField = isTextFieldFocused()
 
         if not inTextField then
             -- No text field focused: pass everything to Vimium
-            -- Reset state so next text field entry starts fresh
             if vim.wasInTextField then
                 vim.wasInTextField = false
                 vim.mode = "insert"
@@ -560,6 +574,11 @@ vim.eventtap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
             -- (In browser this will blur the text field → Vimium takes over)
             vim.pending = ""
             vim.count = ""
+            if vim.inBrowser then
+                vim.wasInTextField = false
+                -- Small delay then update indicator to passthrough
+                hs.timer.doAfter(0.05, function() updateIndicator() end)
+            end
             return false
         end
     end
@@ -631,7 +650,10 @@ vim.appWatcher = hs.application.watcher.new(function(appName, eventType, appObj)
             if not vim.eventtap:isEnabled() then
                 vim.eventtap:start()
             end
-            vim.enterInsert(true) -- silent
+            vim.mode = "insert"
+            vim.count = ""
+            vim.pending = ""
+            updateIndicator()  -- will show passthrough since wasInTextField=false
         else
             vim.inBrowser = false
             vim.wasInTextField = false
