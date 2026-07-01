@@ -1,13 +1,25 @@
-{ pkgs, username, ... }: {
-  # Home Manager needs this to know who you are
+{ pkgs, username, ... }:
+
+{
   home.username = username;
   home.homeDirectory = "/Users/${username}";
+  home.stateVersion = "24.05";
 
-  # This is where Teams goes to be "user-only"
   home.packages = with pkgs; [
     fastfetch
+    texlab
+    (texlive.withPackages (ps: [
+        ps.scheme-full
+        ps.latexmk
+    ]))
   ];
 
-  # Required for Home Manager
-  home.stateVersion = "24.05";
+  targets.darwin.defaults = {
+    # Disable "Open man Page" shortcut in Terminal
+    "com.apple.Terminal" = {
+      NSUserKeyEquivalents = {
+        "Open man Page" = "\\0";
+      };
+    };
+  };
 }
