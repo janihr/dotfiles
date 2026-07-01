@@ -37,7 +37,6 @@
       "notunes"
       "hammerspoon"
       "google-chrome"
-      "skim"
     ];
   };
 }
