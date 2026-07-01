@@ -10,15 +10,27 @@ vim.pending = ""
 -- CONFIGURATION
 -- ============================================================================
 
+-- Apps that have their own Vim — always disabled
 vim.excludedApps = {
     "Terminal", "iTerm2", "Alacritty", "kitty",
     "WezTerm", "Code", "Neovide", "MacVim",
+}
+
+-- Browser apps — Vim only active in text fields, otherwise Vimium handles keys
+vim.browserApps = {
     "Google Chrome", "Chromium", "Brave Browser",
     "Microsoft Edge", "Arc", "Vivaldi", "Opera",
     "Firefox",
 }
 
 vim.scrollAmount = 15
+
+-- ============================================================================
+-- STATE FOR BROWSER TEXT FIELD DETECTION
+-- ============================================================================
+
+vim.inBrowser = false
+vim.wasInTextField = false
 
 -- ============================================================================
 -- UI INDICATOR (Menu Bar)
@@ -90,32 +102,58 @@ local function motion(mods, k, count)
     end
 end
 
+--- Check if the currently focused UI element is a text field (Accessibility API)
+local function isTextFieldFocused()
+    local app = hs.application.frontmostApplication()
+    if not app then return false end
+    local axApp = hs.axuielement.applicationElement(app)
+    if not axApp then return false end
+
+    local ok, focusedElement = pcall(function()
+        return axApp:attributeValue("AXFocusedUIElement")
+    end)
+    if not ok or not focusedElement then return false end
+
+    local role = focusedElement:attributeValue("AXRole")
+    if role == "AXTextField" or role == "AXTextArea" or role == "AXComboBox" then
+        return true
+    end
+
+    -- Catch contenteditable elements (e.g. Gmail compose, Notion)
+    local roleDesc = focusedElement:attributeValue("AXRoleDescription")
+    if roleDesc and (roleDesc:find("text") or roleDesc:find("edit")) then
+        return true
+    end
+
+    return false
+end
+
 -- ============================================================================
 -- MODE TRANSITIONS
 -- ============================================================================
 
-function vim.enterNormal()
+function vim.enterNormal(silent)
     vim.mode = "normal"
     vim.count = ""
     vim.pending = ""
     updateIndicator()
-    showModeAlert("Normal")
+    if not silent then showModeAlert("Normal") end
 end
 
-function vim.enterInsert()
+function vim.enterInsert(silent)
     vim.mode = "insert"
     vim.count = ""
     vim.pending = ""
     updateIndicator()
-    showModeAlert("Insert")
+    if not silent then showModeAlert("Insert") end
 end
 
-function vim.enterVisual()
+function vim.enterVisual(silent)
     vim.mode = "visual"
     vim.count = ""
     vim.pending = ""
     updateIndicator()
-    showModeAlert("Visual")
+    if not silent then showModeAlert("Visual") end
 end
 
 -- ============================================================================
@@ -486,13 +524,40 @@ vim.eventtap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
         return false
     end
 
-        -- Escape → Normal mode
+    -- ── BROWSER TEXT FIELD DETECTION ──
+    -- If in a browser app, only intercept keys when a text field is focused
+    if vim.inBrowser then
+        local inTextField = isTextFieldFocused()
+
+        if not inTextField then
+            -- No text field focused: pass everything to Vimium
+            -- Reset state so next text field entry starts fresh
+            if vim.wasInTextField then
+                vim.wasInTextField = false
+                vim.mode = "insert"
+                vim.count = ""
+                vim.pending = ""
+                updateIndicator()
+            end
+            return false
+        else
+            -- Text field just gained focus: auto-enter insert mode
+            if not vim.wasInTextField then
+                vim.wasInTextField = true
+                vim.enterInsert(true) -- silent
+            end
+            -- Fall through to normal handling below
+        end
+    end
+
+    -- Escape → Normal mode
     if keyCode == 53 then
         if vim.mode ~= "normal" then
             vim.enterNormal()
             return true
         else
             -- Already in normal mode: pass Escape through to the app
+            -- (In browser this will blur the text field → Vimium takes over)
             vim.pending = ""
             vim.count = ""
             return false
@@ -532,7 +597,7 @@ vim.eventtap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
 end)
 
 -- ============================================================================
--- APP WATCHER (auto-disable for terminals/editors)
+-- APP WATCHER (auto-disable for terminals/editors, detect browsers)
 -- ============================================================================
 
 vim.appWatcher = hs.application.watcher.new(function(appName, eventType, appObj)
@@ -547,11 +612,29 @@ vim.appWatcher = hs.application.watcher.new(function(appName, eventType, appObj)
             end
         end
 
+        local isBrowser = false
+        for _, name in ipairs(vim.browserApps) do
+            if appName:find(name, 1, true) then
+                isBrowser = true
+                break
+            end
+        end
+
         if excluded then
             vim.eventtap:stop()
             vim.mode = "disabled"
+            vim.inBrowser = false
             updateIndicator()
+        elseif isBrowser then
+            vim.inBrowser = true
+            vim.wasInTextField = false
+            if not vim.eventtap:isEnabled() then
+                vim.eventtap:start()
+            end
+            vim.enterInsert(true) -- silent
         else
+            vim.inBrowser = false
+            vim.wasInTextField = false
             if not vim.eventtap:isEnabled() then
                 vim.eventtap:start()
                 vim.enterInsert()
