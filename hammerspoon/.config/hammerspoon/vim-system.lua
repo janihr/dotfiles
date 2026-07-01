@@ -13,6 +13,9 @@ vim.pending = ""
 vim.excludedApps = {
     "Terminal", "iTerm2", "Alacritty", "kitty",
     "WezTerm", "Code", "Neovide", "MacVim",
+    "Google Chrome", "Chromium", "Brave Browser",
+    "Microsoft Edge", "Arc", "Vivaldi", "Opera",
+    "Firefox",
 }
 
 vim.scrollAmount = 15
@@ -483,15 +486,17 @@ vim.eventtap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(eve
         return false
     end
 
-    -- Escape → Normal mode
+        -- Escape → Normal mode
     if keyCode == 53 then
         if vim.mode ~= "normal" then
             vim.enterNormal()
+            return true
         else
+            -- Already in normal mode: pass Escape through to the app
             vim.pending = ""
             vim.count = ""
+            return false
         end
-        return true
     end
 
     -- Ctrl+[ as escape
